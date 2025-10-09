@@ -1,0 +1,35 @@
+{
+  "id": 3,
+  "title": "コネクティッドポーン",
+  "fen": "4k3/4P3/3P4/3K4/8/8/1b6/8 w - - 0 1",
+  "side": "white",
+  "characterId": 1,
+  "difficulty": 1,
+  "dialogue": {
+    "intro": "ポーンを上手く使ってみよう！",
+    "mid": "いい感じ！",
+    "success": "ポーンでチェックメイトだね！",
+    "fail": "キングを追い詰めてみよう！",
+    "retry": ""
+  },
+  "turns": [
+    {
+      "player": {
+        "from": "d5",
+        "to": "e6"
+      },
+      "hint": "相手のキングを追い詰めよう！",
+      "reply": {
+        "from": "b2",
+        "to": "a3"
+      }
+    },
+    {
+      "player": {
+        "from": "d6",
+        "to": "d7"
+      },
+      "hint": "ポーンの効きに注目だよ！"
+    }
+  ]
+}

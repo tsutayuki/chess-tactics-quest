@@ -1,0 +1,35 @@
+{
+  "id": 2,
+  "title": "ナイトフォーク",
+  "fen": "3q4/6k1/5pp1/2N5/4P3/5P2/4K3/8 w - - 0 1",
+  "side": "white",
+  "characterId": 1,
+  "difficulty": 1,
+  "dialogue": {
+    "intro": "ナイトをうまく使おう！",
+    "mid": "いい感じ！",
+    "success": "クイーンを取れたね！",
+    "fail": "うまくナイトを使ってみよう！",
+    "retry": ""
+  },
+  "turns": [
+    {
+      "player": {
+        "from": "c5",
+        "to": "e6"
+      },
+      "hint": "ナイトで相手のピースを攻撃してみよう！",
+      "reply": {
+        "from": "g7",
+        "to": "f7"
+      }
+    },
+    {
+      "player": {
+        "from": "e6",
+        "to": "d8"
+      },
+      "hint": "相手の強力なピースを取ってみよう！"
+    }
+  ]
+}
