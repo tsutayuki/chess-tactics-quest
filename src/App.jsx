@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Chess } from "chess.js";
 import { alphaPieces } from "./alphaPaths";
 import puzzles from "./data/puzzles";
-import charactersData from "./data/characters.json";
+import charactersData from "./data/characters.js";
 import bgAurora from "../assets/images/background/2ecfef14-4dce-4a1e-959d-01e3c257fb38.png";
 import siteLogo from "../assets/images/logo/logo.png";
 import bgmTrack from "../assets/BGM/BGM1.mp3";
@@ -59,8 +59,8 @@ const CHARACTER_MAP = charactersData.reduce((acc, raw) => {
     badge: raw.badge || (raw.name ? raw.name.slice(0, 2).toUpperCase() : "??"),
     theme: raw.theme || FALLBACK_CHARACTER.theme,
     accent: raw.accent || FALLBACK_CHARACTER.accent,
-    iconImage: raw.iconImage ? new URL(raw.iconImage, import.meta.url).href : null,
-    cutinImage: raw.cutinImage ? new URL(raw.cutinImage, import.meta.url).href : null,
+    iconImage: raw.iconImage ?? null,
+    cutinImage: raw.cutinImage ?? null,
   };
   return acc;
 }, {});
