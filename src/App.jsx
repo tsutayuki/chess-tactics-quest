@@ -821,6 +821,16 @@ export default function App() {
         <section className="card board-card">
           <div className="toolbar">
             <div className="status-label">{status.toUpperCase()}</div>
+            <div className="toolbar__actions">
+              <button
+                type="button"
+                className="btn-primary btn-primary--tight"
+                onClick={goNextPuzzle}
+                disabled={!puzzleSolved && status !== "fail"}
+              >
+                次の問題へ
+              </button>
+            </div>
           </div>
 
           <div className="board-wrap">
@@ -894,47 +904,55 @@ export default function App() {
               </div>
             </div>
           ) : null}
-          <div className="option-toggle">
-            <div className="option-slider">
-              <label className="option-slider__label" htmlFor="bgm-volume">BGM</label>
-              <input
-                id="bgm-volume"
-                type="range"
-                min="0"
-                max="100"
-                step="5"
-                value={Math.round(bgmVolume * 100)}
-                onChange={handleBgmVolumeChange}
-              />
-              <span className="option-slider__value">{Math.round(bgmVolume * 100)}%</span>
+          <div className="options-panel">
+            <div className="options-row options-row--slider">
+              <div className="option-slider">
+                <div className="option-slider__header">
+                  <label className="option-slider__label" htmlFor="bgm-volume">BGM</label>
+                  <span className="option-slider__value">{Math.round(bgmVolume * 100)}%</span>
+                </div>
+                <input
+                  id="bgm-volume"
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="5"
+                  value={Math.round(bgmVolume * 100)}
+                  onChange={handleBgmVolumeChange}
+                />
+              </div>
+              <div className="option-slider">
+                <div className="option-slider__header">
+                  <label className="option-slider__label" htmlFor="se-volume">SE</label>
+                  <span className="option-slider__value">{Math.round(seVolume * 100)}%</span>
+                </div>
+                <input
+                  id="se-volume"
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="5"
+                  value={Math.round(seVolume * 100)}
+                  onChange={handleSeVolumeChange}
+                />
+              </div>
             </div>
-            <div className="option-slider">
-              <label className="option-slider__label" htmlFor="se-volume">SE</label>
-              <input
-                id="se-volume"
-                type="range"
-                min="0"
-                max="100"
-                step="5"
-                value={Math.round(seVolume * 100)}
-                onChange={handleSeVolumeChange}
-              />
-              <span className="option-slider__value">{Math.round(seVolume * 100)}%</span>
+            <div className="options-row options-row--switches">
+              <button type="button" className={`option-switch ${cutinEnabled ? "is-on" : "is-off"}`} onClick={toggleCutin}>
+                <span className="option-switch__label">CUT-IN</span>
+                <span className="option-switch__track">
+                  <span className="option-switch__thumb" />
+                </span>
+                <span className="option-switch__state">{cutinEnabled ? "ON" : "OFF"}</span>
+              </button>
+              <button type="button" className={`option-switch ${legalHintsEnabled ? "is-on" : "is-off"}`} onClick={toggleLegalHints}>
+                <span className="option-switch__label">MOVE HINT</span>
+                <span className="option-switch__track">
+                  <span className="option-switch__thumb" />
+                </span>
+                <span className="option-switch__state">{legalHintsEnabled ? "ON" : "OFF"}</span>
+              </button>
             </div>
-            <button type="button" className={`option-switch ${cutinEnabled ? "is-on" : "is-off"}`} onClick={toggleCutin}>
-              <span className="option-switch__label">CUT-IN</span>
-              <span className="option-switch__track">
-                <span className="option-switch__thumb" />
-              </span>
-              <span className="option-switch__state">{cutinEnabled ? "ON" : "OFF"}</span>
-            </button>
-            <button type="button" className={`option-switch ${legalHintsEnabled ? "is-on" : "is-off"}`} onClick={toggleLegalHints}>
-              <span className="option-switch__label">MOVE HINT</span>
-              <span className="option-switch__track">
-                <span className="option-switch__thumb" />
-              </span>
-              <span className="option-switch__state">{legalHintsEnabled ? "ON" : "OFF"}</span>
-            </button>
           </div>
         </section>
 
@@ -959,9 +977,6 @@ export default function App() {
           </div>
           <div className="speech">
             <p>{message}</p>
-          </div>
-          <div className="puzzle-actions">
-            <button className="btn-primary" onClick={goNextPuzzle} disabled={!puzzleSolved && status !== "fail"}>次の問題</button>
           </div>
           <div className="history-panel">
             <h3>これまでの手順</h3>
@@ -1023,7 +1038,8 @@ body{margin:0;display:block;min-height:100vh;background:var(--bg);color:var(--fg
 @media (max-width:960px){.layout{grid-template-columns:1fr;max-width:760px;gap:20px}}
 .card{background:var(--card);border:1px solid rgba(15,23,42,0.08);border-radius:20px;box-shadow:0 14px 28px rgba(15,23,42,0.08);width:100%}
 .board-card{padding:18px;position:relative;overflow:hidden}
-.toolbar{display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.toolbar{display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap;justify-content:space-between}
+.toolbar__actions{display:flex;gap:10px;align-items:center}
 .btn{background:var(--fg);color:#fff;border:none;border-radius:999px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;transition:transform .16s ease,box-shadow .16s ease}
 .btn:hover{transform:translateY(-2px);box-shadow:0 10px 18px rgba(15,23,42,0.15)}
 .btn:disabled{opacity:0.45;cursor:not-allowed;box-shadow:none;transform:none}
@@ -1032,7 +1048,8 @@ body{margin:0;display:block;min-height:100vh;background:var(--bg);color:var(--fg
 .btn-primary{background:var(--accent);border:none;border-radius:12px;padding:10px 16px;font-size:13px;font-weight:600;color:#fff;cursor:pointer;transition:transform .16s ease,box-shadow .16s ease}
 .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 20px rgba(59,130,246,0.2)}
 .btn-primary:disabled{background:rgba(59,130,246,0.35);color:rgba(255,255,255,0.8)}
-.status-label{margin-left:auto;font-size:12px;font-weight:700;color:var(--accent);letter-spacing:0.1em}
+.btn-primary--tight{padding:8px 16px;font-size:12px;letter-spacing:0.04em}
+.status-label{margin-right:auto;font-size:12px;font-weight:700;color:var(--accent);letter-spacing:0.1em}
 .board-wrap{display:grid;grid-template-columns:28px var(--board-size);grid-template-rows:var(--board-size) 26px;gap:10px;justify-content:center}
 .ranks{display:flex;flex-direction:column;justify-content:space-between;height:var(--board-size);color:var(--muted);font-size:12px;padding:8px 6px 8px 0;grid-column:1;grid-row:1}
 .ranks div{display:flex;justify-content:flex-end;align-items:center;height:calc(var(--board-size)/8)}
@@ -1060,18 +1077,22 @@ body{margin:0;display:block;min-height:100vh;background:var(--bg);color:var(--fg
 .drag-piece{position:fixed;top:0;left:0;pointer-events:none;z-index:40;display:flex;align-items:center;justify-content:center}
 .drag-piece .piece-wrap{width:100%;height:100%}
 .drag-piece .piece-svg{filter:drop-shadow(0 12px 22px rgba(15,23,42,0.3))}
-.option-toggle{margin-top:18px;display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
-.option-slider{min-width:180px;padding:10px 14px;border-radius:14px;background:rgba(15,23,42,0.05);display:flex;align-items:center;gap:12px;font-size:11px;font-weight:700;letter-spacing:0.08em}
-.option-slider__label{text-transform:uppercase;min-width:48px}
-.option-slider input[type=range]{flex:1;appearance:none;height:4px;border-radius:999px;background:rgba(148,163,184,0.5);outline:none;cursor:pointer}
+.options-panel{margin-top:18px;padding:14px;border-radius:16px;background:rgba(15,23,42,0.035);display:flex;flex-direction:column;gap:14px}
+.options-row{display:flex;gap:12px;flex-wrap:wrap}
+.options-row--slider .option-slider{flex:1 1 180px}
+.options-row--switches{justify-content:flex-start}
+.option-slider{flex:1 1 auto;min-width:160px;padding:12px;border-radius:12px;background:#fff;border:1px solid rgba(148,163,184,0.3);display:flex;flex-direction:column;gap:10px;box-shadow:0 4px 10px rgba(15,23,42,0.05)}
+.option-slider__header{display:flex;align-items:center;justify-content:space-between;font-size:10px;font-weight:800;letter-spacing:0.08em;color:#64748b;text-transform:uppercase}
+.option-slider__label{cursor:pointer}
+.option-slider input[type=range]{width:100%;appearance:none;height:4px;border-radius:999px;background:rgba(148,163,184,0.4);outline:none;cursor:pointer;margin:0}
 .option-slider input[type=range]::-webkit-slider-thumb{appearance:none;width:16px;height:16px;border-radius:50%;background:#1d4ed8;box-shadow:0 3px 6px rgba(15,23,42,0.25)}
 .option-slider input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#1d4ed8;border:none;box-shadow:0 3px 6px rgba(15,23,42,0.25)}
-.option-slider__value{min-width:32px;text-align:right}
-.option-switch{min-width:140px;display:flex;align-items:center;justify-content:space-between;background:rgba(15,23,42,0.05);border:none;border-radius:14px;padding:10px 16px;font-size:11px;font-weight:700;letter-spacing:0.08em;cursor:pointer;transition:transform .16s ease,box-shadow .16s ease,background .16s ease,color .16s ease}
+.option-slider__value{min-width:38px;text-align:right}
+.option-switch{min-width:0;flex:1 1 150px;display:flex;align-items:center;justify-content:space-between;background:#fff;border:none;border-radius:12px;padding:10px 14px;font-size:11px;font-weight:700;letter-spacing:0.08em;cursor:pointer;transition:transform .16s ease,box-shadow .16s ease,background .16s ease,color .16s ease;border:1px solid rgba(148,163,184,0.3);box-shadow:0 4px 10px rgba(15,23,42,0.05)}
 .option-switch:hover{transform:translateY(-2px);box-shadow:0 8px 16px rgba(15,23,42,0.12)}
 .option-switch:focus-visible{outline:3px solid rgba(59,130,246,0.4);outline-offset:3px}
-.option-switch.is-on{background:rgba(59,130,246,0.16);color:#1d4ed8}
-.option-switch.is-off{background:rgba(15,23,42,0.05);color:#1f2937}
+.option-switch.is-on{background:rgba(59,130,246,0.16);color:#1d4ed8;border-color:rgba(37,99,235,0.32)}
+.option-switch.is-off{background:#fff;color:#1f2937}
 .option-switch__label{text-transform:uppercase;font-weight:800;flex:1}
 .option-switch__track{width:46px;height:24px;border-radius:999px;background:rgba(148,163,184,0.5);position:relative;display:flex;align-items:center;padding:4px;transition:background .18s ease;margin-left:12px}
 .option-switch.is-on .option-switch__track{background:rgba(37,99,235,0.65)}
@@ -1133,27 +1154,27 @@ body{margin:0;display:block;min-height:100vh;background:var(--bg);color:var(--fg
   .layout{margin:16px auto 36px;padding:0 16px}
   .board-card{padding:14px}
   .side{padding:18px}
-  .toolbar{justify-content:center}
-  .status-label{margin-left:0;text-align:center}
+  .toolbar{flex-direction:column;align-items:stretch;gap:10px}
+  .toolbar__actions{width:100%;justify-content:center}
+  .toolbar__actions .btn-primary{width:100%}
+  .status-label{margin:0 auto;text-align:center}
 }
 @media (max-width:600px){
   .layout{padding:0 12px;margin:16px auto 28px;gap:18px}
   .board-wrap{grid-template-columns:var(--board-size);grid-template-rows:var(--board-size) auto;gap:6px}
   .ranks{display:none}
   .files{grid-column:1;grid-row:2;width:var(--board-size);justify-self:center;font-size:11px}
-  .toolbar{flex-direction:column;align-items:stretch}
-  .toolbar .btn,
-  .toolbar .btn-secondary{width:100%}
-  .option-slider{width:100%;min-width:0;flex-direction:column;align-items:flex-start;gap:8px}
-  .option-toggle{flex-direction:column;width:100%;align-items:stretch}
-  .option-toggle .option-switch{width:100%}
-  .puzzle-actions{justify-content:center}
+  .options-panel{padding:12px}
+  .options-row{flex-direction:column}
+  .option-slider{width:100%;min-width:0}
+  .options-row--switches{flex-direction:column}
+  .option-switch{width:100%;flex:1 1 auto}
 }
 @media (max-width:480px){
   .topbar__brand{font-size:18px}
   .topbar__logo{width:40px;height:40px}
   .board-card{padding:12px}
   .side{padding:16px}
-  .option-slider{padding:12px}
+  .options-panel{margin-top:12px;padding:10px}
 }
 `;
