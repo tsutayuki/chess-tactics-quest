@@ -905,14 +905,12 @@ export default function App() {
             </div>
           ) : null}
           <div className="options-panel">
-            <div className="options-row options-row--slider">
-              <div className="option-slider">
-                <div className="option-slider__header">
-                  <label className="option-slider__label" htmlFor="bgm-volume">BGM</label>
-                  <span className="option-slider__value">{Math.round(bgmVolume * 100)}%</span>
-                </div>
+            <div className="options-grid">
+              <div className="option option--slider">
+                <label className="option__label" htmlFor="bgm-volume">BGM</label>
                 <input
                   id="bgm-volume"
+                  className="option__range"
                   type="range"
                   min="0"
                   max="100"
@@ -920,14 +918,13 @@ export default function App() {
                   value={Math.round(bgmVolume * 100)}
                   onChange={handleBgmVolumeChange}
                 />
+                <span className="option__value">{Math.round(bgmVolume * 100)}%</span>
               </div>
-              <div className="option-slider">
-                <div className="option-slider__header">
-                  <label className="option-slider__label" htmlFor="se-volume">SE</label>
-                  <span className="option-slider__value">{Math.round(seVolume * 100)}%</span>
-                </div>
+              <div className="option option--slider">
+                <label className="option__label" htmlFor="se-volume">SE</label>
                 <input
                   id="se-volume"
+                  className="option__range"
                   type="range"
                   min="0"
                   max="100"
@@ -935,22 +932,25 @@ export default function App() {
                   value={Math.round(seVolume * 100)}
                   onChange={handleSeVolumeChange}
                 />
+                <span className="option__value">{Math.round(seVolume * 100)}%</span>
               </div>
-            </div>
-            <div className="options-row options-row--switches">
-              <button type="button" className={`option-switch ${cutinEnabled ? "is-on" : "is-off"}`} onClick={toggleCutin}>
-                <span className="option-switch__label">CUT-IN</span>
-                <span className="option-switch__track">
-                  <span className="option-switch__thumb" />
-                </span>
-                <span className="option-switch__state">{cutinEnabled ? "ON" : "OFF"}</span>
+              <button
+                type="button"
+                className={`option option--toggle ${cutinEnabled ? "is-on" : "is-off"}`}
+                onClick={toggleCutin}
+                aria-pressed={cutinEnabled}
+              >
+                <span className="option__label">CUT-IN</span>
+                <span className="option__state">{cutinEnabled ? "ON" : "OFF"}</span>
               </button>
-              <button type="button" className={`option-switch ${legalHintsEnabled ? "is-on" : "is-off"}`} onClick={toggleLegalHints}>
-                <span className="option-switch__label">MOVE HINT</span>
-                <span className="option-switch__track">
-                  <span className="option-switch__thumb" />
-                </span>
-                <span className="option-switch__state">{legalHintsEnabled ? "ON" : "OFF"}</span>
+              <button
+                type="button"
+                className={`option option--toggle ${legalHintsEnabled ? "is-on" : "is-off"}`}
+                onClick={toggleLegalHints}
+                aria-pressed={legalHintsEnabled}
+              >
+                <span className="option__label">MOVE HINT</span>
+                <span className="option__state">{legalHintsEnabled ? "ON" : "OFF"}</span>
               </button>
             </div>
           </div>
@@ -1077,28 +1077,24 @@ body{margin:0;display:block;min-height:100vh;background:var(--bg);color:var(--fg
 .drag-piece{position:fixed;top:0;left:0;pointer-events:none;z-index:40;display:flex;align-items:center;justify-content:center}
 .drag-piece .piece-wrap{width:100%;height:100%}
 .drag-piece .piece-svg{filter:drop-shadow(0 12px 22px rgba(15,23,42,0.3))}
-.options-panel{margin-top:14px;padding:10px;border-radius:12px;background:rgba(15,23,42,0.03);display:flex;flex-direction:column;gap:10px}
-.options-row{display:flex;gap:8px;flex-wrap:wrap}
-.options-row--slider .option-slider{flex:1 1 160px}
-.options-row--switches{justify-content:flex-start}
-.option-slider{flex:1 1 auto;min-width:140px;padding:8px 10px;border-radius:10px;background:#fff;border:1px solid rgba(148,163,184,0.28);display:flex;flex-direction:column;gap:6px;box-shadow:0 2px 6px rgba(15,23,42,0.04)}
-.option-slider__header{display:flex;align-items:center;justify-content:space-between;font-size:9px;font-weight:800;letter-spacing:0.08em;color:#64748b;text-transform:uppercase}
-.option-slider__label{cursor:pointer}
-.option-slider input[type=range]{width:100%;appearance:none;height:3px;border-radius:999px;background:rgba(148,163,184,0.35);outline:none;cursor:pointer;margin:0}
-.option-slider input[type=range]::-webkit-slider-thumb{appearance:none;width:14px;height:14px;border-radius:50%;background:#1d4ed8;box-shadow:0 2px 5px rgba(15,23,42,0.2)}
-.option-slider input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#1d4ed8;border:none;box-shadow:0 2px 5px rgba(15,23,42,0.2)}
-.option-slider__value{min-width:32px;text-align:right}
-.option-switch{min-width:0;flex:1 1 140px;display:flex;align-items:center;justify-content:space-between;background:#fff;border:none;border-radius:10px;padding:8px 12px;font-size:10px;font-weight:700;letter-spacing:0.06em;cursor:pointer;transition:transform .16s ease,box-shadow .16s ease,background .16s ease,color .16s ease;border:1px solid rgba(148,163,184,0.28);box-shadow:0 2px 6px rgba(15,23,42,0.04)}
-.option-switch:hover{transform:translateY(-1px);box-shadow:0 6px 12px rgba(15,23,42,0.1)}
-.option-switch:focus-visible{outline:3px solid rgba(59,130,246,0.4);outline-offset:3px}
-.option-switch.is-on{background:rgba(59,130,246,0.16);color:#1d4ed8;border-color:rgba(37,99,235,0.32)}
-.option-switch.is-off{background:#fff;color:#1f2937}
-.option-switch__label{text-transform:uppercase;font-weight:800;flex:1}
-.option-switch__track{width:42px;height:22px;border-radius:999px;background:rgba(148,163,184,0.45);position:relative;display:flex;align-items:center;padding:3px;transition:background .18s ease;margin-left:10px}
-.option-switch.is-on .option-switch__track{background:rgba(37,99,235,0.6)}
-.option-switch__thumb{width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 3px 7px rgba(15,23,42,0.14);transform:translateX(0);transition:transform .18s ease}
-.option-switch.is-on .option-switch__thumb{transform:translateX(18px)}
-.option-switch__state{font-weight:800;min-width:30px;text-align:right;margin-left:8px}
+.options-panel{margin-top:12px;padding:8px;border-radius:10px;background:rgba(15,23,42,0.03);box-shadow:inset 0 0 0 1px rgba(148,163,184,0.16)}
+.options-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px}
+.option{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;background:#fff;border:1px solid rgba(148,163,184,0.28);box-shadow:0 1px 3px rgba(15,23,42,0.08);font-size:11px;font-weight:600;letter-spacing:0.04em;min-height:42px}
+.option--slider{gap:10px}
+.option__label{text-transform:uppercase;font-weight:800;letter-spacing:0.08em;color:#475569;display:flex;align-items:center}
+.option--slider .option__label{min-width:42px}
+.option__range{flex:1;appearance:none;height:3px;border-radius:999px;background:rgba(148,163,184,0.35);outline:none;margin:0}
+.option__range::-webkit-slider-thumb{appearance:none;width:14px;height:14px;border-radius:50%;background:#1d4ed8;box-shadow:0 2px 5px rgba(15,23,42,0.2)}
+.option__range::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#1d4ed8;border:none;box-shadow:0 2px 5px rgba(15,23,42,0.2)}
+.option__range:focus-visible{outline:2px solid rgba(59,130,246,0.35);outline-offset:2px}
+.option__value{min-width:32px;text-align:right;font-size:10px;font-weight:800;color:#1f2937}
+.option--toggle{justify-content:space-between;cursor:pointer;transition:transform .12s ease,box-shadow .12s ease,border-color .12s ease,background .12s ease}
+.option--toggle:hover{transform:translateY(-1px);box-shadow:0 6px 12px rgba(15,23,42,0.12)}
+.option--toggle:focus-visible{outline:2px solid rgba(59,130,246,0.4);outline-offset:3px}
+.option__state{padding:3px 8px;border-radius:999px;font-size:10px;font-weight:800;letter-spacing:0.08em;background:rgba(148,163,184,0.25);color:#475569}
+.option--toggle.is-on{border-color:rgba(37,99,235,0.35);background:rgba(59,130,246,0.08)}
+.option--toggle.is-on .option__label{color:#1d4ed8}
+.option--toggle.is-on .option__state{background:rgba(59,130,246,0.22);color:#1d4ed8}
 .side{padding:22px;display:flex;flex-direction:column;gap:18px}
 .character{display:flex;gap:16px;align-items:center}
 .character__badge{width:64px;height:64px;border-radius:18px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:18px;box-shadow:0 12px 20px rgba(15,23,42,0.15);overflow:hidden}
@@ -1164,17 +1160,21 @@ body{margin:0;display:block;min-height:100vh;background:var(--bg);color:var(--fg
   .board-wrap{grid-template-columns:var(--board-size);grid-template-rows:var(--board-size) auto;gap:6px}
   .ranks{display:none}
   .files{grid-column:1;grid-row:2;width:var(--board-size);justify-self:center;font-size:11px}
-  .options-panel{padding:8px}
-  .options-row{flex-direction:column}
-  .option-slider{width:100%;min-width:0}
-  .options-row--switches{flex-direction:column}
-  .option-switch{width:100%;flex:1 1 auto}
+  .options-panel{padding:6px}
+  .options-grid{grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:6px}
+  .option{min-height:38px;padding:5px 6px}
+  .option__label{font-size:10px}
+  .option__value{font-size:9px}
 }
 @media (max-width:480px){
   .topbar__brand{font-size:18px}
   .topbar__logo{width:40px;height:40px}
   .board-card{padding:12px}
   .side{padding:16px}
-  .options-panel{margin-top:10px;padding:8px}
+  .options-panel{margin-top:8px;padding:6px}
+  .options-grid{grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
+  .option{gap:6px}
+  .option__label{font-size:9px}
+  .option--slider .option__label{min-width:34px}
 }
 `;
