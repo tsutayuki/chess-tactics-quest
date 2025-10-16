@@ -7,7 +7,7 @@ const characters = [
   {
     id: 1,
     name: "ヒカリ",
-    title: "元気系アニ研部員",
+    title: "元気系チェス研部員",
     badge: "HI",
     theme: "#f472b6",
     accent: "rgba(244,114,182,0.12)",
