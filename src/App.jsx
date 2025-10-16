@@ -907,7 +907,10 @@ export default function App() {
           <div className="options-panel">
             <div className="options-grid">
               <div className="option option--slider">
-                <label className="option__label" htmlFor="bgm-volume">BGM</label>
+                <div className="option__header">
+                  <label className="option__label" htmlFor="bgm-volume">BGM</label>
+                  <span className="option__value">{Math.round(bgmVolume * 100)}%</span>
+                </div>
                 <input
                   id="bgm-volume"
                   className="option__range"
@@ -918,10 +921,12 @@ export default function App() {
                   value={Math.round(bgmVolume * 100)}
                   onChange={handleBgmVolumeChange}
                 />
-                <span className="option__value">{Math.round(bgmVolume * 100)}%</span>
               </div>
               <div className="option option--slider">
-                <label className="option__label" htmlFor="se-volume">SE</label>
+                <div className="option__header">
+                  <label className="option__label" htmlFor="se-volume">SE</label>
+                  <span className="option__value">{Math.round(seVolume * 100)}%</span>
+                </div>
                 <input
                   id="se-volume"
                   className="option__range"
@@ -932,7 +937,6 @@ export default function App() {
                   value={Math.round(seVolume * 100)}
                   onChange={handleSeVolumeChange}
                 />
-                <span className="option__value">{Math.round(seVolume * 100)}%</span>
               </div>
               <button
                 type="button"
@@ -1079,16 +1083,18 @@ body{margin:0;display:block;min-height:100vh;background:var(--bg);color:var(--fg
 .drag-piece .piece-svg{filter:drop-shadow(0 12px 22px rgba(15,23,42,0.3))}
 .options-panel{margin-top:12px;padding:8px;border-radius:10px;background:rgba(15,23,42,0.03);box-shadow:inset 0 0 0 1px rgba(148,163,184,0.16)}
 .options-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px}
-.option{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;background:#fff;border:1px solid rgba(148,163,184,0.28);box-shadow:0 1px 3px rgba(15,23,42,0.08);font-size:11px;font-weight:600;letter-spacing:0.04em;min-height:42px}
-.option--slider{gap:10px}
+.option{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;background:#fff;border:1px solid rgba(148,163,184,0.28);box-shadow:0 1px 3px rgba(15,23,42,0.08);font-size:11px;font-weight:600;letter-spacing:0.04em;min-height:42px;box-sizing:border-box}
+.option--slider{flex-direction:column;align-items:stretch;gap:6px;min-height:56px}
+.option__header{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .option__label{text-transform:uppercase;font-weight:800;letter-spacing:0.08em;color:#475569;display:flex;align-items:center}
-.option--slider .option__label{min-width:42px}
-.option__range{flex:1;appearance:none;height:3px;border-radius:999px;background:rgba(148,163,184,0.35);outline:none;margin:0}
+.option--slider .option__label{white-space:nowrap}
+.option__range{flex:1;appearance:none;height:3px;border-radius:999px;background:rgba(148,163,184,0.35);outline:none;margin:0;max-width:100%}
 .option__range::-webkit-slider-thumb{appearance:none;width:14px;height:14px;border-radius:50%;background:#1d4ed8;box-shadow:0 2px 5px rgba(15,23,42,0.2)}
 .option__range::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#1d4ed8;border:none;box-shadow:0 2px 5px rgba(15,23,42,0.2)}
 .option__range:focus-visible{outline:2px solid rgba(59,130,246,0.35);outline-offset:2px}
 .option__value{min-width:32px;text-align:right;font-size:10px;font-weight:800;color:#1f2937}
-.option--toggle{justify-content:space-between;cursor:pointer;transition:transform .12s ease,box-shadow .12s ease,border-color .12s ease,background .12s ease}
+.option--toggle{justify-content:space-between;cursor:pointer;transition:transform .12s ease,box-shadow .12s ease,border-color .12s ease,background .12s ease;min-height:46px}
+.option--toggle .option__label{flex:1;min-width:0}
 .option--toggle:hover{transform:translateY(-1px);box-shadow:0 6px 12px rgba(15,23,42,0.12)}
 .option--toggle:focus-visible{outline:2px solid rgba(59,130,246,0.4);outline-offset:3px}
 .option__state{padding:3px 8px;border-radius:999px;font-size:10px;font-weight:800;letter-spacing:0.08em;background:rgba(148,163,184,0.25);color:#475569}
@@ -1162,7 +1168,8 @@ body{margin:0;display:block;min-height:100vh;background:var(--bg);color:var(--fg
   .files{grid-column:1;grid-row:2;width:var(--board-size);justify-self:center;font-size:11px}
   .options-panel{padding:6px}
   .options-grid{grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:6px}
-  .option{min-height:38px;padding:5px 6px}
+  .option{min-height:40px;padding:5px 6px}
+  .option--slider{min-height:50px}
   .option__label{font-size:10px}
   .option__value{font-size:9px}
 }
@@ -1175,6 +1182,7 @@ body{margin:0;display:block;min-height:100vh;background:var(--bg);color:var(--fg
   .options-grid{grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
   .option{gap:6px}
   .option__label{font-size:9px}
-  .option--slider .option__label{min-width:34px}
+  .option__header{gap:6px}
+  .option__value{min-width:28px}
 }
 `;
