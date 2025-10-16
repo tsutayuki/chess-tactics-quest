@@ -734,6 +734,8 @@ export default function App() {
     setLegalHintsEnabled((prev) => !prev);
   }, []);
   const puzzleSolved = status === "success";
+  const difficultyValue = Number(currentPuzzle.difficulty) || 0;
+  const difficultyStars = difficultyValue > 0 ? "☆".repeat(Math.min(difficultyValue, 5)) : null;
   const formattedHistory = useMemo(() => {
     if (history.length === 0) return [];
     const entries = [];
@@ -821,6 +823,12 @@ export default function App() {
         <section className="card board-card">
           <div className="toolbar">
             <div className="status-label">{status.toUpperCase()}</div>
+            {difficultyStars ? (
+              <div className="difficulty-badge" aria-label={`難易度 ${difficultyValue}`}>
+                <span className="difficulty-badge__label">問題難易度</span>
+                <span className="difficulty-badge__stars">{difficultyStars}</span>
+              </div>
+            ) : null}
             <div className="toolbar__actions">
               <button
                 type="button"
@@ -977,6 +985,12 @@ export default function App() {
               <div className="character__name">{character.name}</div>
               <div className="character__title">{character.title}</div>
               <div className="character__puzzle">{currentPuzzle.title}</div>
+              {difficultyStars ? (
+                <div className="character__difficulty" aria-label={`難易度 ${difficultyValue}`}>
+                  <span className="character__difficulty-label">問題難易度：</span>
+                  <span className="character__difficulty-stars">{difficultyStars}</span>
+                </div>
+              ) : null}
             </div>
           </div>
           <div className="speech">
@@ -1044,6 +1058,9 @@ body{margin:0;display:block;min-height:100vh;background:var(--bg);color:var(--fg
 .board-card{padding:18px;position:relative;overflow:hidden}
 .toolbar{display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap;justify-content:space-between}
 .toolbar__actions{display:flex;gap:10px;align-items:center}
+.difficulty-badge{display:inline-flex;align-items:center;justify-content:center;padding:6px 12px;border-radius:999px;background:rgba(59,130,246,0.08);color:#1d4ed8;font-weight:800;letter-spacing:0.12em;font-size:12px;min-width:120px;gap:6px}
+.difficulty-badge__label{text-transform:none;font-size:11px;letter-spacing:0.06em;color:#1e3a8a}
+.difficulty-badge__stars{letter-spacing:0.3em}
 .btn{background:var(--fg);color:#fff;border:none;border-radius:999px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;transition:transform .16s ease,box-shadow .16s ease}
 .btn:hover{transform:translateY(-2px);box-shadow:0 10px 18px rgba(15,23,42,0.15)}
 .btn:disabled{opacity:0.45;cursor:not-allowed;box-shadow:none;transform:none}
@@ -1109,6 +1126,9 @@ body{margin:0;display:block;min-height:100vh;background:var(--bg);color:var(--fg
 .character__name{font-size:18px;font-weight:700}
 .character__title{font-size:13px;color:var(--muted)}
 .character__puzzle{margin-top:4px;font-size:12px;font-weight:600;color:var(--accent)}
+.character__difficulty{font-size:12px;font-weight:800;letter-spacing:0.08em;color:#f59e0b;display:flex;align-items:center;gap:6px}
+.character__difficulty-label{color:#f97316;font-weight:700}
+.character__difficulty-stars{letter-spacing:0.2em}
 .speech{background:var(--accent-soft);border:1px solid rgba(15,23,42,0.06);border-radius:14px;padding:16px;font-size:14px;line-height:1.6;min-height:78px;position:relative}
 .speech::before{content:'';position:absolute;top:-10px;left:28px;border-width:0 14px 14px;border-style:solid;border-color:transparent transparent var(--accent-soft)}
 .puzzle-actions{display:flex;gap:12px;flex-wrap:wrap}
@@ -1159,6 +1179,7 @@ body{margin:0;display:block;min-height:100vh;background:var(--bg);color:var(--fg
   .toolbar{flex-direction:column;align-items:stretch;gap:10px}
   .toolbar__actions{width:100%;justify-content:center}
   .toolbar__actions .btn-primary{width:100%}
+  .difficulty-badge{width:100%;justify-content:center}
   .status-label{margin:0 auto;text-align:center}
 }
 @media (max-width:600px){
