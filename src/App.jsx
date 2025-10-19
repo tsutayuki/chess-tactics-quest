@@ -12,6 +12,7 @@ import seCheck from "../assets/SE/check.mp3";
 import seCapture from "../assets/SE/take.mp3";
 import seMove from "../assets/SE/move.mp3";
 import seBlocked from "../assets/SE/cannot_move.mp3";
+import { SidePanel } from "./components/SidePanel.jsx";
 
 const BOARD_SIZE = 560;
 const PIECE_SCALE = 0.84;
@@ -24,7 +25,7 @@ const RANKS_BLACK = [...RANKS_WHITE].reverse();
 
 const PROGRESS_KEY = "tactics-progress";
 
-const SITE_TITLE = "CHESS TACTICE QUEST";
+const SITE_TITLE = "CHESS TACTICS QUEST";
 
 const DEFAULT_LINES = {
   intro: "よし、まずは肩慣らしにこのポジションを解いてみよう！",
@@ -968,60 +969,14 @@ export default function App() {
           </div>
         </section>
 
-        <aside className="card side">
-          <div className="character">
-            <div className="character__badge">
-              {character.iconImage ? (
-                <img
-                  src={character.iconImage}
-                  alt={`${character.name}のアイコン`}
-                  className="character__badge-image"
-                />
-              ) : (
-                <span>{character.badge}</span>
-              )}
-            </div>
-            <div className="character__meta">
-              <div className="character__name">{character.name}</div>
-              <div className="character__title">{character.title}</div>
-              <div className="character__puzzle">{currentPuzzle.title}</div>
-              {difficultyStars ? (
-                <div className="character__difficulty" aria-label={`難易度 ${difficultyValue}`}>
-                  <span className="character__difficulty-label">問題難易度：</span>
-                  <span className="character__difficulty-stars">{difficultyStars}</span>
-                </div>
-              ) : null}
-            </div>
-          </div>
-          <div className="speech">
-            <p>{message}</p>
-          </div>
-          <div className="history-panel">
-            <h3>これまでの手順</h3>
-            {formattedHistory.length === 0 ? (
-              <p className="history-panel__empty">まだ指し手はありません。</p>
-            ) : (
-              <ol className="history-list">
-                {formattedHistory.map((entry) => (
-                  <li key={`move-${entry.moveNumber}-${entry.ellipsis ? "ellipsis" : "normal"}-${entry.white ?? "none"}-${entry.black ?? "none"}`} className="history-move">
-                    <span className="history-move__number">
-                      {entry.moveNumber}
-                      {entry.ellipsis ? "..." : "."}
-                    </span>
-                    {entry.white ? (
-                      <span className="history-move__white">{entry.white}</span>
-                    ) : null}
-                    {entry.black ? (
-                      <span className={`history-move__black ${entry.white ? "" : "history-move__black--solo"}`}>
-                        {entry.white ? `… ${entry.black}` : entry.black}
-                      </span>
-                    ) : null}
-                  </li>
-                ))}
-              </ol>
-            )}
-          </div>
-        </aside>
+        <SidePanel
+          character={character}
+          currentPuzzle={currentPuzzle}
+          difficultyValue={difficultyValue}
+          difficultyStars={difficultyStars}
+          message={message}
+          formattedHistory={formattedHistory}
+        />
       </main>
     </div>
   );

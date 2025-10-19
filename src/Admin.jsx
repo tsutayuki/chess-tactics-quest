@@ -598,7 +598,7 @@ function Admin() {
     <div className="admin-page">
       <style>{ADMIN_STYLES}</style>
       <header className="admin-header">
-        <h1>CHESS TACTICE QUEST : 管理者ツール</h1>
+        <h1>CHESS TACTICS QUEST : 管理者ツール</h1>
         <p>盤面セットアップと手順記録を GUI で行い、問題 JSON を生成できます。</p>
       </header>
       <main className="admin-layout">
