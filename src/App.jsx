@@ -12,7 +12,7 @@ import seCheck from "../assets/SE/check.mp3";
 import seCapture from "../assets/SE/take.mp3";
 import seMove from "../assets/SE/move.mp3";
 import seBlocked from "../assets/SE/cannot_move.mp3";
-import { SidePanel } from "./components/SidePanel.jsx";
+import { SidePanel } from "./SidePanel.jsx";
 
 const BOARD_SIZE = 560;
 const PIECE_SCALE = 0.84;
