@@ -100,6 +100,26 @@ function getSelectedDifficulty() {
   }
 }
 
+function uciToMove(uci) {
+  if (!uci || typeof uci !== 'string' || uci.length < 4) return null;
+  const from = uci.slice(0, 2).toLowerCase();
+  const to = uci.slice(2, 4).toLowerCase();
+  const promo = uci.length >= 5 ? uci[4].toLowerCase() : undefined;
+  return promo ? { from, to, promotion: promo } : { from, to };
+}
+
+function buildTurnsFromUciArray(arr) {
+  const moves = Array.isArray(arr) ? arr : [];
+  const out = [];
+  for (let i = 0; i < moves.length; i += 2) {
+    const player = uciToMove(moves[i]);
+    if (!player) break;
+    const reply = moves[i + 1] ? uciToMove(moves[i + 1]) : undefined;
+    out.push({ player, ...(reply ? { reply } : null) });
+  }
+  return out;
+}
+
 function PieceIcon({ piece }) {
   if (!piece) return null;
   const color = piece === piece.toUpperCase() ? "white" : "black";
@@ -217,6 +237,7 @@ export default function App() {
     const idx = puzzles.findIndex((p) => Number(p.difficulty) === Number(pref));
     return idx >= 0 ? idx : 0;
   });
+  const [runtimePuzzle, setRuntimePuzzle] = useState(null);
   const [step, setStep] = useState(0);
   const [history, setHistory] = useState([]);
   const [status, setStatus] = useState("intro");
@@ -224,7 +245,7 @@ export default function App() {
 
   const dragMetaRef = useRef(null);
 
-  const currentPuzzle = puzzles[activeIndex];
+  const currentPuzzle = runtimePuzzle || puzzles[activeIndex];
   const character = CHARACTER_MAP[currentPuzzle.characterId] || FALLBACK_CHARACTER;
   const [initialTurn, setInitialTurn] = useState("w");
 
@@ -266,9 +287,33 @@ export default function App() {
 
   const loadPuzzle = useCallback((index, speech = "intro") => {
     const puzzle = puzzles[index];
+    setRuntimePuzzle(null);
     chessRef.current.load(puzzle.fen);
     setFen(chessRef.current.fen());
     setOrientation(puzzle.side === "black" ? "black" : "white");
+    setInitialTurn(chessRef.current.turn());
+    setSelected(null);
+    setLegalMoves(new Map());
+    setHoverSquare(null);
+    setDrag({ active: false, from: null, piece: null, x: 0, y: 0, offsetX: 0, offsetY: 0 });
+    setHintSquares([]);
+    setHistory([]);
+    setStep(0);
+    setCutin({ type: null, text: "", characterId: null, visible: false, pulse: 0 });
+    speak(speech);
+  }, [speak]);
+
+  const loadRuntime = useCallback((puzzle, speech = "intro") => {
+    setRuntimePuzzle(puzzle);
+    chessRef.current.load(puzzle.fen);
+    setFen(chessRef.current.fen());
+    const sideFromFen = (() => {
+      try {
+        const parts = String(puzzle.fen).split(" ");
+        return parts[1] === "b" ? "black" : "white";
+      } catch { return "white"; }
+    })();
+    setOrientation(puzzle.side || sideFromFen);
     setInitialTurn(chessRef.current.turn());
     setSelected(null);
     setLegalMoves(new Map());
@@ -465,12 +510,16 @@ export default function App() {
   }, [clearSelection]);
 
   const resetCurrentPuzzle = useCallback(() => {
-    loadPuzzle(activeIndex, "retry");
+    if (runtimePuzzle) {
+      loadRuntime(runtimePuzzle, "retry");
+    } else {
+      loadPuzzle(activeIndex, "retry");
+    }
     updateProgress((prev) => ({
       ...prev,
       streak: 0,
     }));
-  }, [activeIndex, loadPuzzle, updateProgress]);
+  }, [activeIndex, loadPuzzle, loadRuntime, runtimePuzzle, updateProgress]);
 
   const handleSuccess = useCallback(() => {
     speak("success");
@@ -719,24 +768,41 @@ export default function App() {
     };
   }, [clearSelection, drag.active, files, handlePlayerMove, ranks, status]);
 
-  const goNextPuzzle = useCallback(() => {
-    const pref = getSelectedDifficulty();
-    if (!pref) {
+  const goNextPuzzle = useCallback(async () => {
+    const level = getSelectedDifficulty();
+    const bucket = {
+      1: "900-1200",
+      2: "1200-1500",
+      3: "1500-1800",
+      4: "1800-2100",
+      5: "2100-2400",
+      6: "2400-4000",
+    }[Number(level) || 3];
+
+    try {
+      const res = await fetch(`/api/problem?range=${bucket}`, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`API ${res.status}`);
+      const data = await res.json();
+
+      const turns = buildTurnsFromUciArray(Array.isArray(data.moves) ? data.moves : []);
+      const title = `タクティクス (${bucket})`;
+      const rp = {
+        id: data.id ?? `${bucket}-${Date.now()}`,
+        title,
+        fen: data.fen,
+        side: (String(data.fen).split(' ')[1] === 'b') ? 'black' : 'white',
+        characterId: 1,
+        difficulty: Number(level) || 3,
+        dialogue: { intro: '', mid: '', success: '', fail: '', retry: '' },
+        turns,
+      };
+      loadRuntime(rp, "intro");
+    } catch (err) {
+      // Fallback to local rotation if API fails
       const nextIndex = (activeIndex + 1) % puzzles.length;
       setActiveIndex(nextIndex);
-      return;
     }
-    const current = activeIndex;
-    const total = puzzles.length;
-    for (let step = 1; step <= total; step += 1) {
-      const i = (current + step) % total;
-      if (Number(puzzles[i]?.difficulty) === Number(pref)) {
-        setActiveIndex(i);
-        return;
-      }
-    }
-    setActiveIndex((current + 1) % total);
-  }, [activeIndex]);
+  }, [activeIndex, loadRuntime]);
 
   const theme = character.theme || FALLBACK_CHARACTER.theme;
   const accent = character.accent || FALLBACK_CHARACTER.accent;
@@ -768,7 +834,7 @@ export default function App() {
   }, []);
   const puzzleSolved = status === "success";
   const difficultyValue = Number(currentPuzzle.difficulty) || 0;
-  const difficultyStars = difficultyValue > 0 ? "☆".repeat(Math.min(difficultyValue, 5)) : null;
+  const difficultyStars = difficultyValue > 0 ? "☆".repeat(Math.min(difficultyValue, 6)) : null;
   const formattedHistory = useMemo(() => {
     if (history.length === 0) return [];
     const entries = [];
