@@ -24,6 +24,7 @@ const RANKS_WHITE = [8, 7, 6, 5, 4, 3, 2, 1];
 const RANKS_BLACK = [...RANKS_WHITE].reverse();
 
 const PROGRESS_KEY = "tactics-progress";
+const DIFFICULTY_KEY = "selectedDifficulty";
 
 const SITE_TITLE = "CHESS TACTICS QUEST";
 
@@ -85,6 +86,18 @@ function loadProgress() {
 function saveProgress(progress) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress));
+}
+
+function getSelectedDifficulty() {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(DIFFICULTY_KEY);
+    if (!raw) return null;
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : null;
+  } catch {
+    return null;
+  }
 }
 
 function PieceIcon({ piece }) {
@@ -198,7 +211,12 @@ export default function App() {
   const streak = progress.streak ?? 0;
   const bestStreak = progress.bestStreak ?? 0;
 
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(() => {
+    const pref = getSelectedDifficulty();
+    if (!pref) return 0;
+    const idx = puzzles.findIndex((p) => Number(p.difficulty) === Number(pref));
+    return idx >= 0 ? idx : 0;
+  });
   const [step, setStep] = useState(0);
   const [history, setHistory] = useState([]);
   const [status, setStatus] = useState("intro");
@@ -702,8 +720,22 @@ export default function App() {
   }, [clearSelection, drag.active, files, handlePlayerMove, ranks, status]);
 
   const goNextPuzzle = useCallback(() => {
-    const nextIndex = (activeIndex + 1) % puzzles.length;
-    setActiveIndex(nextIndex);
+    const pref = getSelectedDifficulty();
+    if (!pref) {
+      const nextIndex = (activeIndex + 1) % puzzles.length;
+      setActiveIndex(nextIndex);
+      return;
+    }
+    const current = activeIndex;
+    const total = puzzles.length;
+    for (let step = 1; step <= total; step += 1) {
+      const i = (current + step) % total;
+      if (Number(puzzles[i]?.difficulty) === Number(pref)) {
+        setActiveIndex(i);
+        return;
+      }
+    }
+    setActiveIndex((current + 1) % total);
   }, [activeIndex]);
 
   const theme = character.theme || FALLBACK_CHARACTER.theme;
@@ -831,6 +863,12 @@ export default function App() {
               </div>
             ) : null}
             <div className="toolbar__actions">
+              <a href="#/" style={{ textDecoration: 'none' }}>
+                <button type="button" className="btn" style={{ marginRight: 8 }}>ホーム</button>
+              </a>
+              <a href="#/select" style={{ textDecoration: 'none' }}>
+                <button type="button" className="btn" style={{ marginRight: 8 }}>難易度</button>
+              </a>
               <button
                 type="button"
                 className="btn-primary btn-primary--tight"

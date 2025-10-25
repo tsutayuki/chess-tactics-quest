@@ -1,18 +1,23 @@
-import { StrictMode, useEffect, useState } from 'react';
+import { StrictMode, useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
 import App from './App.jsx';
 import Admin from './Admin.jsx';
+import Home from './pages/Home.jsx';
+import Select from './pages/Select.jsx';
 
-function isAdminRoute() {
-  return window.location.hash === '#/admin' || window.location.pathname.endsWith('/admin');
+function parseRoute() {
+  const hash = window.location.hash || '#/';
+  const [path, query = ''] = hash.slice(1).split('?');
+  const params = new URLSearchParams(query);
+  return { path: `#${path}`, params };
 }
 
 function Root() {
-  const [isAdmin, setIsAdmin] = useState(isAdminRoute());
+  const [route, setRoute] = useState(parseRoute());
 
   useEffect(() => {
-    const handler = () => setIsAdmin(isAdminRoute());
+    const handler = () => setRoute(parseRoute());
     window.addEventListener('hashchange', handler);
     window.addEventListener('popstate', handler);
     return () => {
@@ -21,7 +26,21 @@ function Root() {
     };
   }, []);
 
-  return isAdmin ? <Admin /> : <App />;
+  const element = useMemo(() => {
+    switch (route.path) {
+      case '#/admin':
+        return <Admin />;
+      case '#/select':
+        return <Select />;
+      case '#/play':
+        return <App />;
+      case '#/':
+      default:
+        return <Home />;
+    }
+  }, [route.path]);
+
+  return element;
 }
 
 createRoot(document.getElementById('root')).render(
