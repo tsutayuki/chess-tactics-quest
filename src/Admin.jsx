@@ -193,8 +193,6 @@ function Admin() {
     return list;
   }, [displayFiles, displayRanks]);
 
-  const character = CHARACTER_MAP[puzzle.characterId] || CHARACTER_MAP[charactersData[0]?.id];
-
   const applySetupUpdate = useCallback((updater) => {
     setSetupPieces((prevPieces) => {
       const nextPieces = typeof updater === "function" ? updater(prevPieces) : updater;

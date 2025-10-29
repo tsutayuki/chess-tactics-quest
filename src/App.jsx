@@ -30,9 +30,9 @@ const SITE_TITLE = "CHESS TACTICS QUEST";
 
 const DEFAULT_LINES = {
   intro: "よし、まずは肩慣らしにこのポジションを解いてみよう！",
-  hint: "ヒントだよ。キングの位置とピンされている駒に注目してみて？",
-  mid: "リズムはバッチリ！最後まで集中していこう！",
-  success: "さすが！華麗なタクティクスだったね！",
+  hint: "ヒントだよ。キングの位置とピンされた駒に注目してみて！",
+  mid: "リズムはバッチリ！最後まで頑張って！",
+  success: "さすが！華麗なタクティクスだった！",
   fail: "むむっ…もう一回集中してみようか！",
   retry: "もう一度配置を整えて挑戦してみよう！",
 };
@@ -44,7 +44,7 @@ const clampVolume = (value) => {
 
 const FALLBACK_CHARACTER = {
   id: 0,
-  name: "モデレーター",
+  name: "モチE��ーター",
   title: "CHESS TACTICE QUEST",
   badge: "CT",
   theme: "#f59e0b",
@@ -238,6 +238,9 @@ export default function App() {
     return idx >= 0 ? idx : 0;
   });
   const [runtimePuzzle, setRuntimePuzzle] = useState(null);
+  const [packs, setPacks] = useState(null);
+  const [packsError, setPacksError] = useState("");
+  const [notice, setNotice] = useState("");
   const [step, setStep] = useState(0);
   const [history, setHistory] = useState([]);
   const [status, setStatus] = useState("intro");
@@ -323,12 +326,59 @@ export default function App() {
     setHistory([]);
     setStep(0);
     setCutin({ type: null, text: "", characterId: null, visible: false, pulse: 0 });
+    // Auto-play the first move if this puzzle specifies that the problem side moves first.
+    if (puzzle && puzzle.firstAuto) {
+      try {
+        const mv = (typeof puzzle.firstAuto === 'string') ? uciToMove(puzzle.firstAuto) : puzzle.firstAuto;
+        if (mv && mv.from && mv.to) {
+          const res = chessRef.current.move(mv);
+          if (res) {
+            setHistory((prev) => [...prev, { san: res.san, color: res.color }]);
+            setFen(chessRef.current.fen());
+            if (res.flags && (res.flags.includes("c") || res.flags.includes("e"))) {
+              playSe("capture");
+            } else if (res.san && res.san.includes("+")) {
+              playSe("check");
+            } else if (!(res.san && res.san.includes("#"))) {
+              playSe("move");
+            }
+          }
+        }
+      } catch {}
+    }
+    // packs present but no puzzles for selected level: local rotation
+    if (packs && (!packs.puzzles || !Array.isArray(packs.levels))) {
+      const nextIndex = (activeIndex + 1) % puzzles.length;
+      setActiveIndex(nextIndex);
+      return;
+    }
     speak(speech);
-  }, [speak]);
+  }, [playSe, speak]);
 
+  // Load all problems.json on app start
   useEffect(() => {
+    let canceled = false;
+    (async () => {
+      try {
+        const res = await fetch('/problems.json', { cache: 'no-store' });
+        if (!res.ok) throw new Error('failed to load problems.json');
+        const data = await res.json();
+        if (!canceled) setPacks(data);
+      } catch (e) {
+        if (!canceled) {
+          setPacksError(String(e.message || e));
+          setNotice('問題データを読み込めなかったため、ローカルのサンプル問題に差し替えます');
+        }
+      }
+    })();
+    return () => { canceled = true; };
+  }, []);
+
+  // Initial load: prefer packs if available, otherwise fall back to local puzzles
+  useEffect(() => {
+    if (packs && !packsError) return;
     loadPuzzle(activeIndex, "intro");
-  }, [activeIndex, loadPuzzle]);
+  }, [activeIndex, loadPuzzle, packs, packsError]);
 
   useEffect(() => {
     const audio = new Audio(bgmTrack);
@@ -463,13 +513,6 @@ export default function App() {
     };
   }, [cutin.type, cutin.visible]);
 
-  useEffect(() => () => {
-    if (cutinTimerRef.current) {
-      clearTimeout(cutinTimerRef.current);
-      cutinTimerRef.current = null;
-    }
-  }, []);
-
   const nextExpectedMove = useMemo(() => {
     const node = currentPuzzle.turns?.[step];
     if (!node) return null;
@@ -546,7 +589,7 @@ export default function App() {
     setHintSquares([]);
     const hintText = nextExpectedMove?.hint;
     if (hintText) {
-      setMessage(`${failLine}\nヒント: ${hintText}`);
+      setMessage(`${failLine}\nヒンチE ${hintText}`);
     } else {
       setMessage(failLine);
     }
@@ -769,6 +812,47 @@ export default function App() {
   }, [clearSelection, drag.active, files, handlePlayerMove, ranks, status]);
 
   const goNextPuzzle = useCallback(async () => {
+    // Use locally downloaded packs when available (no API)
+    if (packs && !packsError) {
+      const levels = Array.isArray(packs.levels) ? packs.levels : [];
+      const selected = getSelectedDifficulty();
+      const defaultLevelId = levels[0]?.id ?? 1;
+      const levelId = Number.isFinite(Number(selected)) ? Number(selected) : defaultLevelId;
+      const pool = packs.puzzles?.[String(levelId)] || packs.puzzles?.[levelId] || [];
+      if (Array.isArray(pool) && pool.length > 0) {
+        const pick = pool[Math.floor(Math.random() * pool.length)];
+        const allMoves = Array.isArray(pick.moves) ? pick.moves : [];
+        const turns = buildTurnsFromUciArray(allMoves.slice(1));
+        const rp = {
+          id: pick.id ?? `${levelId}-${Date.now()}`,
+          title: (levels.find(l => l.id === levelId)?.label || 'Puzzle'),
+          fen: pick.fen,
+          side: (String(pick.fen).split(' ')[1] === 'b') ? 'black' : 'white',
+          characterId: 1,
+          difficulty: levelId,
+          dialogue: { intro: '', mid: '', success: '', fail: '', retry: '' },
+          turns,
+          firstAuto: uciToMove(allMoves[0]),
+        };
+        setNotice('');
+        loadRuntime(rp, "intro");
+        return;
+      }
+      // If packs are loaded but selected level has no puzzles, fall back to local rotation
+      setNotice('選択した難易度の問題データが見つからなかったため、ローカルのサンプル問題に差し替えます');
+      const nextIndex = (activeIndex + 1) % puzzles.length;
+      setActiveIndex(nextIndex);
+      return;
+    }
+    // No packs yet: simple local rotation (never call API)
+    if (!packs || packsError) {
+      if (packsError) {
+        setNotice('問題データを読み込めなかったため、ローカルのサンプル問題に差し替えます');
+      }
+      const nextIndex = (activeIndex + 1) % puzzles.length;
+      setActiveIndex(nextIndex);
+      return;
+    }
     const level = getSelectedDifficulty();
     const bucket = {
       1: "900-1200",
@@ -784,8 +868,9 @@ export default function App() {
       if (!res.ok) throw new Error(`API ${res.status}`);
       const data = await res.json();
 
-      const turns = buildTurnsFromUciArray(Array.isArray(data.moves) ? data.moves : []);
-      const title = `タクティクス (${bucket})`;
+      const allMoves = Array.isArray(data.moves) ? data.moves : [];
+      const turns = buildTurnsFromUciArray(allMoves.slice(1));
+      const title = `タクチE��クス (${bucket})`;
       const rp = {
         id: data.id ?? `${bucket}-${Date.now()}`,
         title,
@@ -795,6 +880,7 @@ export default function App() {
         difficulty: Number(level) || 3,
         dialogue: { intro: '', mid: '', success: '', fail: '', retry: '' },
         turns,
+        firstAuto: uciToMove(allMoves[0]),
       };
       loadRuntime(rp, "intro");
     } catch (err) {
@@ -802,7 +888,7 @@ export default function App() {
       const nextIndex = (activeIndex + 1) % puzzles.length;
       setActiveIndex(nextIndex);
     }
-  }, [activeIndex, loadRuntime]);
+  }, [activeIndex, loadRuntime, packs, packsError]);
 
   const theme = character.theme || FALLBACK_CHARACTER.theme;
   const accent = character.accent || FALLBACK_CHARACTER.accent;
@@ -834,7 +920,13 @@ export default function App() {
   }, []);
   const puzzleSolved = status === "success";
   const difficultyValue = Number(currentPuzzle.difficulty) || 0;
-  const difficultyStars = difficultyValue > 0 ? "☆".repeat(Math.min(difficultyValue, 6)) : null;
+  const difficultyStars = difficultyValue > 0 ? "★".repeat(Math.min(difficultyValue, 6)) : null;
+  const turnIndicator = useMemo(() => {
+    const t = chessRef.current.turn();
+    const colorLabel = t === 'w' ? '白' : '黒';
+    const isUserTurn = Boolean(nextExpectedMove) && status !== 'success';
+    return isUserTurn ? `手番: あなた (${colorLabel})` : `手番: 出題側 (${colorLabel})`;
+  }, [fen, nextExpectedMove, status]);
   const formattedHistory = useMemo(() => {
     if (history.length === 0) return [];
     const entries = [];
@@ -898,7 +990,7 @@ export default function App() {
         <div className="cutin__panel">
           {cutinCharacter?.cutinImage ? (
             <div className="cutin__art">
-              <img src={cutinCharacter.cutinImage} alt={`${cutinCharacter?.name || "キャラクター"}のカットイン`} />
+              <img src={cutinCharacter.cutinImage} alt={`${cutinCharacter?.name || "キャラクター"}のカチE��イン`} />
             </div>
           ) : null}
           <div className="cutin__content">
@@ -915,13 +1007,14 @@ export default function App() {
         </div>
         <div className="topbar__status">
           <span>連続クリア: {streak}</span>
-          <span>ベスト: {bestStreak}</span>
+          <span>ベスチE {bestStreak}</span>
         </div>
       </header>
       <main className="layout">
         <section className="card board-card">
           <div className="toolbar">
             <div className="status-label">{status.toUpperCase()}</div>
+            <div className="turn-indicator" aria-live="polite">{turnIndicator}</div>
             {difficultyStars ? (
               <div className="difficulty-badge" aria-label={`難易度 ${difficultyValue}`}>
                 <span className="difficulty-badge__label">問題難易度</span>
@@ -930,7 +1023,7 @@ export default function App() {
             ) : null}
             <div className="toolbar__actions">
               <a href="#/" style={{ textDecoration: 'none' }}>
-                <button type="button" className="btn" style={{ marginRight: 8 }}>ホーム</button>
+                <button type="button" className="btn" style={{ marginRight: 8 }}>ホ�Eム</button>
               </a>
               <a href="#/select" style={{ textDecoration: 'none' }}>
                 <button type="button" className="btn" style={{ marginRight: 8 }}>難易度</button>
@@ -945,6 +1038,9 @@ export default function App() {
               </button>
             </div>
           </div>
+          {notice ? (
+            <div className="alert alert--error" role="status">{notice}</div>
+          ) : null}
 
           <div className="board-wrap">
             <div className="ranks">
@@ -1116,7 +1212,10 @@ body{margin:0;display:block;min-height:100vh;background:var(--bg);color:var(--fg
 .card{background:var(--card);border:1px solid rgba(15,23,42,0.08);border-radius:20px;box-shadow:0 14px 28px rgba(15,23,42,0.08);width:100%}
 .board-card{padding:18px;position:relative;overflow:hidden}
 .toolbar{display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap;justify-content:space-between}
-.toolbar__actions{display:flex;gap:10px;align-items:center}
+  .toolbar__actions{display:flex;gap:10px;align-items:center}
+  .turn-indicator{font-weight:800;color:#0f172a;background:rgba(15,23,42,0.06);padding:6px 10px;border-radius:10px}
+  .alert{margin:8px 0 12px;padding:10px 12px;border-radius:10px;font-size:13px}
+  .alert--error{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
 .difficulty-badge{display:inline-flex;align-items:center;justify-content:center;padding:6px 12px;border-radius:999px;background:rgba(59,130,246,0.08);color:#1d4ed8;font-weight:800;letter-spacing:0.12em;font-size:12px;min-width:120px;gap:6px}
 .difficulty-badge__label{text-transform:none;font-size:11px;letter-spacing:0.06em;color:#1e3a8a}
 .difficulty-badge__stars{letter-spacing:0.3em}
