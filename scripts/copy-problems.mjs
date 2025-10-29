@@ -30,9 +30,16 @@ try {
       const parsed = JSON.parse(raw);
       const list = normalizeToPuzzleArray(parsed);
       list.forEach((p, idx) => {
-        const id = p.id ?? `${basename(filePath)}#${idx}`;
-        const fen = p.fen;
-        const moves = Array.isArray(p.moves) ? p.moves : [];
+        const id = p.id ?? p.PuzzleId ?? `${basename(filePath)}#${idx}`;
+        const fen = p.FEN || p.fen;
+        const rawMoves = p.Moves || p.moves;
+        let moves = [];
+        if (typeof rawMoves === 'string') {
+          moves = rawMoves.split(' ').filter(Boolean);
+        } else if (Array.isArray(rawMoves)) {
+          moves = rawMoves;
+        }
+
         if (typeof fen === 'string' && moves.length > 0) {
           entries.push({ id, fen, moves, rating });
         }
@@ -80,7 +87,9 @@ function normalizeToPuzzleArray(parsed) {
   if (parsed && typeof parsed === 'object') {
     if (Array.isArray(parsed.puzzles)) return parsed.puzzles;
     // single puzzle object case
-    if ('fen' in parsed && 'moves' in parsed) return [parsed];
+    const hasFen = 'fen' in parsed || 'FEN' in parsed;
+    const hasMoves = 'moves' in parsed || 'Moves' in parsed;
+    if (hasFen && hasMoves) return [parsed];
   }
   return [];
 }
