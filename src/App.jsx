@@ -984,8 +984,8 @@ export default function App() {
   }, []);
   const puzzleSolved = status === "success";
   const difficultyValue = Number(currentPuzzle.difficulty) || 0;
-  const turnIndicator = useMemo(() => {
   const difficultyStars = difficultyValue > 0 ? "★".repeat(Math.min(difficultyValue, 6)) : null;
+  const turnIndicator = useMemo(() => {
     const t = chessRef.current.turn();
     const colorLabel = t === 'w' ? '白' : '黒';
     const isUserTurn = Boolean(nextExpectedMove) && status !== 'success';
