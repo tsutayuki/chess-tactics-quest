@@ -64,3 +64,48 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* UI text fixes for /play toolbar and badge */
+.toolbar__actions a[href="#/"] > .btn {
+  font-size: 0 !important;
+}
+.toolbar__actions a[href="#/"] > .btn::after {
+  content: "ホーム画面";
+  font-size: 13px;
+}
+
+.toolbar__actions a[href="#/select"] > .btn {
+  font-size: 0 !important;
+}
+.toolbar__actions a[href="#/select"] > .btn::after {
+  content: "難易度選択";
+  font-size: 13px;
+}
+
+.toolbar__actions .btn-primary {
+  font-size: 0 !important;
+}
+.toolbar__actions .btn-primary::after {
+  content: "次の問題";
+  font-size: 13px;
+}
+
+.difficulty-badge__label {
+  font-size: 0 !important;
+}
+.difficulty-badge__label::after {
+  content: "難易度";
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: #1e3a8a;
+  text-transform: none;
+}
+
+/* Side panel difficulty label */
+.character__difficulty-label {
+  font-size: 0 !important;
+}
+.character__difficulty-label::after {
+  content: "難易度";
+  font-size: 12px;
+}
