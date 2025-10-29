@@ -29,12 +29,12 @@ const DIFFICULTY_KEY = "selectedDifficulty";
 const SITE_TITLE = "CHESS TACTICS QUEST";
 
 const DEFAULT_LINES = {
-  intro: "よし、まず�E肩慣らしにこ�Eポジションを解ぁE��みよう�E�E,
-  hint: "ヒントだよ。キングの位置とピンされてぁE��駒に注目してみて�E�E,
-  mid: "リズムはバッチリ�E�最後まで雁E��してぁE��ぁE��E,
-  success: "さすが！華麗なタクチE��クスだった�E�E�E,
-  fail: "むむっ…もう一回集中してみようか！E,
-  retry: "もう一度配置を整えて挑戦してみよう�E�E,
+  intro: "よし、まずは肩慣らしにこのポジションを解いてみよう！",
+  hint: "ヒントだよ。キングの位置とピンされた駒に注目してみて！",
+  mid: "リズムはバッチリ！最後まで頑張って！",
+  success: "さすが！華麗なタクティクスだった！",
+  fail: "むむっ…もう一回集中してみようか！",
+  retry: "もう一度配置を整えて挑戦してみよう！",
 };
 
 const clampVolume = (value) => {
@@ -367,7 +367,7 @@ export default function App() {
       } catch (e) {
         if (!canceled) {
           setPacksError(String(e.message || e));
-          setNotice('問題データを読み込めなかったため、ローカルのサンプル問題に刁E��替えます、E);
+          setNotice('問題データを読み込めなかったため、ローカルのサンプル問題に差し替えます');
         }
       }
     })();
@@ -839,7 +839,7 @@ export default function App() {
         return;
       }
       // If packs are loaded but selected level has no puzzles, fall back to local rotation
-      setNotice('選択した難易度の問題データが見つからなかったため、ローカルのサンプル問題に差し替えます、E);
+      setNotice('選択した難易度の問題データが見つからなかったため、ローカルのサンプル問題に差し替えます');
       const nextIndex = (activeIndex + 1) % puzzles.length;
       setActiveIndex(nextIndex);
       return;
@@ -847,7 +847,7 @@ export default function App() {
     // No packs yet: simple local rotation (never call API)
     if (!packs || packsError) {
       if (packsError) {
-        setNotice('問題データを読み込めなかったため、ローカルのサンプル問題に差し替えます、E);
+        setNotice('問題データを読み込めなかったため、ローカルのサンプル問題に差し替えます');
       }
       const nextIndex = (activeIndex + 1) % puzzles.length;
       setActiveIndex(nextIndex);
@@ -900,9 +900,9 @@ export default function App() {
         "--cutin-soft": cutinCharacter ? cutinCharacter.accent : accent,
       };
   const cutinSfx = cutin.type === "success"
-    ? "ナイスショチE��!"
+    ? "ナイスショット!"
     : cutin.type === "fail"
-      ? "もう一回！E
+      ? "もう一回！"
       : "";
   const handleBgmVolumeChange = useCallback((event) => {
     const value = Number(event.target.value);
@@ -920,12 +920,12 @@ export default function App() {
   }, []);
   const puzzleSolved = status === "success";
   const difficultyValue = Number(currentPuzzle.difficulty) || 0;
-  const difficultyStars = difficultyValue > 0 ? "☁E.repeat(Math.min(difficultyValue, 6)) : null;
+  const difficultyStars = difficultyValue > 0 ? "★".repeat(Math.min(difficultyValue, 6)) : null;
   const turnIndicator = useMemo(() => {
     const t = chessRef.current.turn();
-    const colorLabel = t === 'w' ? '白' : '黁E;
+    const colorLabel = t === 'w' ? '白' : '黒';
     const isUserTurn = Boolean(nextExpectedMove) && status !== 'success';
-    return isUserTurn ? `手番: あなた！E{colorLabel}�E�` : `手番: 出題�E�E�E{colorLabel}�E�`;
+    return isUserTurn ? `手番: あなた (${colorLabel})` : `手番: 出題側 (${colorLabel})`;
   }, [fen, nextExpectedMove, status]);
   const formattedHistory = useMemo(() => {
     if (history.length === 0) return [];
