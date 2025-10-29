@@ -306,6 +306,20 @@ export default function App() {
     speak(speech);
   }, [speak]);
 
+  // Sound effect player needs to be declared before any hooks that depend on it
+  const playSe = useCallback((key) => {
+    if (seVolume <= 0) return;
+    const sounds = seRef.current;
+    const audio = sounds?.[key];
+    if (!audio) return;
+    try {
+      audio.currentTime = 0;
+      audio.play().catch(() => {});
+    } catch {
+      // ignore playback issues
+    }
+  }, [seVolume]);
+
   const loadRuntime = useCallback((puzzle, speech = "intro") => {
     setRuntimePuzzle(puzzle);
     chessRef.current.load(puzzle.fen);
@@ -376,9 +390,43 @@ export default function App() {
 
   // Initial load: prefer packs if available, otherwise fall back to local puzzles
   useEffect(() => {
-    if (packs && !packsError) return;
-    loadPuzzle(activeIndex, "intro");
-  }, [activeIndex, loadPuzzle, packs, packsError]);
+    // packsがロードされた後の処理
+    if (packs && !packsError) {
+      const levels = Array.isArray(packs.levels) ? packs.levels : [];
+      const selected = getSelectedDifficulty();
+      const defaultLevelId = levels[0]?.id ?? 1;
+      const levelId = Number.isFinite(Number(selected)) ? Number(selected) : defaultLevelId;
+      const pool = packs.puzzles?.[String(levelId)] || packs.puzzles?.[levelId] || [];
+      
+      if (Array.isArray(pool) && pool.length > 0) {
+        const pick = pool[Math.floor(Math.random() * pool.length)];
+        const allMoves = Array.isArray(pick.moves) ? pick.moves : [];
+        const turns = buildTurnsFromUciArray(allMoves.slice(1));
+        const rp = {
+          id: pick.id ?? `${levelId}-${Date.now()}`,
+          title: (levels.find(l => l.id === levelId)?.label || 'Puzzle'),
+          fen: pick.fen,
+          side: (String(pick.fen).split(' ')[1] === 'b') ? 'black' : 'white',
+          characterId: 1,
+          difficulty: levelId,
+          dialogue: { intro: '', mid: '', success: '', fail: '', retry: '' },
+          turns,
+          firstAuto: uciToMove(allMoves[0]),
+        };
+        setNotice('');
+        loadRuntime(rp, "intro");
+      } else {
+        // packsはあるが、選択した難易度の問題がない場合
+        setNotice('選択した難易度の問題データが見つからなかったため、ローカルのサンプル問題に差し替えます');
+        loadPuzzle(0, "intro"); // とりあえず最初のローカル問題にフォールバック
+      }
+    } 
+    // packsがまだロードされていない、かつエラーもない場合 (初回ロード)
+    else if (!packs && !packsError) {
+      loadPuzzle(activeIndex, "intro");
+    }
+    // packsErrorがある場合は何もしない（エラーメッセージが表示されている）
+  }, [packs, packsError, activeIndex, loadPuzzle, loadRuntime]);
 
   useEffect(() => {
     const audio = new Audio(bgmTrack);
@@ -462,18 +510,7 @@ export default function App() {
     }
   }, [bgmVolume]);
 
-  const playSe = useCallback((key) => {
-    if (seVolume <= 0) return;
-    const sounds = seRef.current;
-    const audio = sounds?.[key];
-    if (!audio) return;
-    try {
-      audio.currentTime = 0;
-      audio.play().catch(() => {});
-    } catch {
-      // ignore playback issues
-    }
-  }, [seVolume]);
+  // (moved earlier so hooks above can depend on it)
 
   const updateProgress = useCallback((updater) => {
     setProgress((prev) => {
