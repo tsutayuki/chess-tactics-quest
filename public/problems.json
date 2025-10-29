@@ -1,0 +1,28 @@
+{
+  "levels": [
+    { "id": 1, "label": "Beginner" },
+    { "id": 2, "label": "Intermediate" }
+  ],
+  "puzzles": {
+    "1": [
+      {
+        "id": "demo-1",
+        "fen": "6nk/6pp/3N4/8/8/8/5PPP/5K2 w - - 0 1",
+        "moves": ["d6f7"]
+      },
+      {
+        "id": "demo-2",
+        "fen": "3q4/6k1/5pp1/2N5/4P3/5P2/4K3/8 w - - 0 1",
+        "moves": ["c5e6","g7f7","e6d8"]
+      }
+    ],
+    "2": [
+      {
+        "id": "demo-3",
+        "fen": "6k1/8/8/8/8/8/8/6K1 b - - 0 1",
+        "moves": ["g8h7"]
+      }
+    ]
+  }
+}
+

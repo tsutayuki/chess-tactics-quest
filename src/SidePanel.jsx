@@ -44,7 +44,7 @@ export function SidePanel({
         ) : (
           <ol className="history-list">
             {formattedHistory.map((entry) => (
-              <li key={`move-${entry.moveNumber}-${entry.ellipsis ? "ellipsis" : "normal"}-${entry.white ?? "none"}-${entry.black ?? "none"}`} className="history-move">
+              <li key={`${entry.moveNumber}-${entry.ellipsis ? 'e' : 'w'}`} className="history-move">
                 <span className="history-move__number">
                   {entry.moveNumber}
                   {entry.ellipsis ? "..." : "."}
