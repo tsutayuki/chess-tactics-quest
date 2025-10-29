@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+﻿import React, { useEffect, useMemo, useState } from 'react';
 
 const DIFFICULTY_KEY = 'selectedDifficulty';
 
@@ -50,7 +50,7 @@ export default function Select() {
 
   return (
     <div style={{ padding: 24, maxWidth: 720, margin: '0 auto' }}>
-      <h1>難易度を選択</h1>
+      <h1>難易度を選ぶ</h1>
       <p style={{ color: '#64748b', marginTop: 0 }}>あとから変更もできます（ローカル保存）</p>
       {content}
       <div style={{ marginTop: 24 }}>
@@ -59,4 +59,3 @@ export default function Select() {
     </div>
   );
 }
-

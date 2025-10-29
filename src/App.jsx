@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+﻿import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Chess } from "chess.js";
 import { alphaPieces } from "./alphaPaths";
 import puzzles from "./data/puzzles";
@@ -29,12 +29,12 @@ const DIFFICULTY_KEY = "selectedDifficulty";
 const SITE_TITLE = "CHESS TACTICS QUEST";
 
 const DEFAULT_LINES = {
-  intro: "よし、まずは肩慣らしにこのポジションを解いてみよう！",
-  hint: "ヒントだよ。キングの位置とピンされた駒に注目してみて！",
-  mid: "リズムはバッチリ！最後まで頑張って！",
-  success: "さすが！華麗なタクティクスだった！",
-  fail: "むむっ…もう一回集中してみようか！",
-  retry: "もう一度配置を整えて挑戦してみよう！",
+  intro: "よし、まず肩慣らしにこのポジションを解いてみよう！",
+  hint: "ヒントだよ。キングの位置とピンされた駒に注目してみて。",
+  mid: "リズムはばっちり！ 最後まで頑張って。",
+  success: "さすが！ 華麗なタクティクスだった！",
+  fail: "むむっ…もう一回集中してみよう！",
+  retry: "もう一度配置を整えて挑戦してみよう。",
 };
 
 const clampVolume = (value) => {
@@ -44,8 +44,8 @@ const clampVolume = (value) => {
 
 const FALLBACK_CHARACTER = {
   id: 0,
-  name: "モチE��ーター",
-  title: "CHESS TACTICE QUEST",
+  name: "モチベーター",
+  title: "CHESS TACTICS QUEST",
   badge: "CT",
   theme: "#f59e0b",
   accent: "rgba(245,158,11,0.12)",
@@ -400,7 +400,7 @@ export default function App() {
   // Initial load: prefer packs if available, otherwise fall back to local puzzles
   // Limit dependencies to packs/packsError to avoid re-running on callback identity changes
   useEffect(() => {
-    // packsがロードされた後の処理
+    // packs縺後Ο繝ｼ繝峨＆繧後◆蠕後・蜃ｦ逅・
     if (packs && !packsError) {
       const levels = Array.isArray(packs.levels) ? packs.levels : [];
       const selected = getSelectedDifficulty();
@@ -426,16 +426,16 @@ export default function App() {
         setNotice('');
         loadRuntime(rp, "intro");
       } else {
-        // packsはあるが、選択した難易度の問題がない場合
+        // packs縺ｯ縺ゅｋ縺後・∈謚槭＠縺滄屮譏灘ｺｦ縺ｮ蝠城｡後′縺ｪ縺・ｴ蜷・
         setNotice('選択した難易度の問題データが見つからなかったため、ローカルのサンプル問題に差し替えます');
-        loadPuzzle(0, "intro"); // とりあえず最初のローカル問題にフォールバック
+        loadPuzzle(0, "intro"); // 縺ｨ繧翫≠縺医★譛蛻昴・繝ｭ繝ｼ繧ｫ繝ｫ蝠城｡後↓繝輔か繝ｼ繝ｫ繝舌ャ繧ｯ
       }
     } 
-    // packsがまだロードされていない、かつエラーもない場合 (初回ロード)
+    // packs縺後∪縺繝ｭ繝ｼ繝峨＆繧後※縺・↑縺・√°縺､繧ｨ繝ｩ繝ｼ繧ゅ↑縺・ｴ蜷・(蛻晏屓繝ｭ繝ｼ繝・
     else if (!packs && !packsError) {
       loadPuzzle(activeIndex, "intro");
     }
-    // packsErrorがある場合は何もしない（エラーメッセージが表示されている）
+    // packsError縺後≠繧句ｴ蜷医・菴輔ｂ縺励↑縺・ｼ医お繝ｩ繝ｼ繝｡繝・そ繝ｼ繧ｸ縺瑚｡ｨ遉ｺ縺輔ｌ縺ｦ縺・ｋ・・
   }, [packs, packsError]);
 
   useEffect(() => {
@@ -643,7 +643,7 @@ export default function App() {
     setHintSquares([]);
     const hintText = nextExpectedMove?.hint;
     if (hintText) {
-      setMessage(`${failLine}\nヒンチE ${hintText}`);
+      setMessage(`${failLine}\n繝偵Φ繝・ ${hintText}`);
     } else {
       setMessage(failLine);
     }
@@ -934,7 +934,7 @@ export default function App() {
 
       const allMoves = Array.isArray(data.moves) ? data.moves : [];
       const turns = buildTurnsFromUciArray(allMoves.slice(1));
-      const title = `タクチE��クス (${bucket})`;
+      const title = `繧ｿ繧ｯ繝・・ｽ・ｽ繧ｯ繧ｹ (${bucket})`;
       const rp = {
         id: data.id ?? `${bucket}-${Date.now()}`,
         title,
@@ -964,7 +964,7 @@ export default function App() {
         "--cutin-soft": cutinCharacter ? cutinCharacter.accent : accent,
       };
   const cutinSfx = cutin.type === "success"
-    ? "ナイスショット!"
+    ? "ナイス！"
     : cutin.type === "fail"
       ? "もう一回！"
       : "";
@@ -984,12 +984,12 @@ export default function App() {
   }, []);
   const puzzleSolved = status === "success";
   const difficultyValue = Number(currentPuzzle.difficulty) || 0;
-  const difficultyStars = difficultyValue > 0 ? "★".repeat(Math.min(difficultyValue, 6)) : null;
   const turnIndicator = useMemo(() => {
+  const difficultyStars = difficultyValue > 0 ? "★".repeat(Math.min(difficultyValue, 6)) : null;
     const t = chessRef.current.turn();
     const colorLabel = t === 'w' ? '白' : '黒';
     const isUserTurn = Boolean(nextExpectedMove) && status !== 'success';
-    return isUserTurn ? `手番: あなた (${colorLabel})` : `手番: 出題側 (${colorLabel})`;
+    return isUserTurn ? `手番: あなた（${colorLabel}）` : `手番: 出題側（${colorLabel}）`;
   }, [fen, nextExpectedMove, status]);
   const formattedHistory = useMemo(() => {
     if (history.length === 0) return [];
@@ -1054,7 +1054,7 @@ export default function App() {
         <div className="cutin__panel">
           {cutinCharacter?.cutinImage ? (
             <div className="cutin__art">
-              <img src={cutinCharacter.cutinImage} alt={`${cutinCharacter?.name || "キャラクター"}のカチE��イン`} />
+              <img src={cutinCharacter.cutinImage} alt={`${cutinCharacter?.name || "キャラクター"}のカットイン`} />
             </div>
           ) : null}
           <div className="cutin__content">
@@ -1066,12 +1066,12 @@ export default function App() {
       </div>
       <header className="topbar">
         <div className="topbar__brand">
-          <img className="topbar__logo" src={siteLogo} alt={`${SITE_TITLE} ロゴ`} />
+          <img className="topbar__logo" src={siteLogo} alt={`${SITE_TITLE} 繝ｭ繧ｴ`} />
           <span className="topbar__title">{SITE_TITLE}</span>
         </div>
         <div className="topbar__status">
-          <span>連続クリア: {streak}</span>
-          <span>ベスチE {bestStreak}</span>
+          <span>ベスト: {streak}</span>
+          <span>ベスト: {bestStreak}</span>
         </div>
       </header>
       <main className="layout">
@@ -1080,17 +1080,17 @@ export default function App() {
             <div className="status-label">{status.toUpperCase()}</div>
             <div className="turn-indicator" aria-live="polite">{turnIndicator}</div>
             {difficultyStars ? (
-              <div className="difficulty-badge" aria-label={`難易度 ${difficultyValue}`}>
-                <span className="difficulty-badge__label">問題難易度</span>
+              <div className="difficulty-badge" aria-label={`髮｣譏灘ｺｦ ${difficultyValue}`}>
+                <span className="difficulty-badge__label">蝠城｡碁屮譏灘ｺｦ</span>
                 <span className="difficulty-badge__stars">{difficultyStars}</span>
               </div>
             ) : null}
             <div className="toolbar__actions">
               <a href="#/" style={{ textDecoration: 'none' }}>
-                <button type="button" className="btn" style={{ marginRight: 8 }}>ホーム</button>
+                <button type="button" className="btn" style={{ marginRight: 8 }}>繝帙・繝</button>
               </a>
               <a href="#/select" style={{ textDecoration: 'none' }}>
-                <button type="button" className="btn" style={{ marginRight: 8 }}>難易度</button>
+                <button type="button" className="btn" style={{ marginRight: 8 }}>髮｣譏灘ｺｦ</button>
               </a>
               <button
                 type="button"
@@ -1098,7 +1098,7 @@ export default function App() {
                 onClick={goNextPuzzle}
                 disabled={!puzzleSolved && status !== "fail"}
               >
-                次の問題へ
+                谺｡縺ｮ蝠城｡後∈
               </button>
             </div>
           </div>
@@ -1245,7 +1245,6 @@ export default function App() {
     </div>
   );
 }
-
 const CSS = (themeColor, accentColor) => `
 :root{
   --board-size:clamp(240px,78vw,${BOARD_SIZE}px);
@@ -1429,3 +1428,4 @@ body{margin:0;display:block;min-height:100vh;background:var(--bg);color:var(--fg
   .option__value{min-width:28px}
 }
 `;
+
