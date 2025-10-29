@@ -389,6 +389,7 @@ export default function App() {
   }, []);
 
   // Initial load: prefer packs if available, otherwise fall back to local puzzles
+  // Limit dependencies to packs/packsError to avoid re-running on callback identity changes
   useEffect(() => {
     // packsがロードされた後の処理
     if (packs && !packsError) {
@@ -426,7 +427,7 @@ export default function App() {
       loadPuzzle(activeIndex, "intro");
     }
     // packsErrorがある場合は何もしない（エラーメッセージが表示されている）
-  }, [packs, packsError, activeIndex, loadPuzzle, loadRuntime]);
+  }, [packs, packsError]);
 
   useEffect(() => {
     const audio = new Audio(bgmTrack);
@@ -1060,7 +1061,7 @@ export default function App() {
             ) : null}
             <div className="toolbar__actions">
               <a href="#/" style={{ textDecoration: 'none' }}>
-                <button type="button" className="btn" style={{ marginRight: 8 }}>ホ�Eム</button>
+                <button type="button" className="btn" style={{ marginRight: 8 }}>ホーム</button>
               </a>
               <a href="#/select" style={{ textDecoration: 'none' }}>
                 <button type="button" className="btn" style={{ marginRight: 8 }}>難易度</button>
