@@ -219,6 +219,7 @@ export default function App() {
 
   const [cutin, setCutin] = useState({ type: null, text: "", characterId: null, visible: false, pulse: 0 });
   const cutinTimerRef = useRef(null);
+  const autoReplyTimerRef = useRef(null);
   const audioRef = useRef(null);
   const playbackHandlerRef = useRef(null);
   const seRef = useRef({});
@@ -289,6 +290,10 @@ export default function App() {
   }, [currentPuzzle]);
 
   const loadPuzzle = useCallback((index, speech = "intro") => {
+    if (autoReplyTimerRef.current) {
+      clearTimeout(autoReplyTimerRef.current);
+      autoReplyTimerRef.current = null;
+    }
     const puzzle = puzzles[index];
     setRuntimePuzzle(null);
     chessRef.current.load(puzzle.fen);
@@ -321,6 +326,10 @@ export default function App() {
   }, [seVolume]);
 
   const loadRuntime = useCallback((puzzle, speech = "intro") => {
+    if (autoReplyTimerRef.current) {
+      clearTimeout(autoReplyTimerRef.current);
+      autoReplyTimerRef.current = null;
+    }
     setRuntimePuzzle(puzzle);
     chessRef.current.load(puzzle.fen);
     setFen(chessRef.current.fen());
@@ -480,6 +489,13 @@ export default function App() {
       Object.values(sounds).forEach((audio) => audio.pause());
       seRef.current = {};
     };
+  }, []);
+
+  useEffect(() => () => {
+    if (autoReplyTimerRef.current) {
+      clearTimeout(autoReplyTimerRef.current);
+      autoReplyTimerRef.current = null;
+    }
   }, []);
 
   useEffect(() => {
@@ -697,15 +713,25 @@ export default function App() {
     setHintSquares([]);
 
     if (expected.autoReply) {
-      const replyResult = applyMove(expected.autoReply);
-      if (!replyResult) {
-        // undo the player move if auto reply fails for some reason
-        chessRef.current.undo();
-        setHistory((prev) => prev.slice(0, -1));
-        setFen(chessRef.current.fen());
-        handleFailure();
-        return false;
-      }
+      autoReplyTimerRef.current = setTimeout(() => {
+        autoReplyTimerRef.current = null;
+        const replyResult = applyMove(expected.autoReply);
+        if (!replyResult) {
+          chessRef.current.undo();
+          setHistory((prev) => prev.slice(0, -1));
+          setFen(chessRef.current.fen());
+          handleFailure();
+          return;
+        }
+        const isCompleteAfter = step + 1 >= (currentPuzzle.turns?.length || 0);
+        if (isCompleteAfter) {
+          handleSuccess();
+        } else {
+          speak("mid") || setStatus("mid");
+          setStep((prev) => prev + 1);
+        }
+      }, 500);
+      return true;
     }
 
     const isComplete = step + 1 >= (currentPuzzle.turns?.length || 0);
@@ -1237,8 +1263,8 @@ const CSS = (themeColor, accentColor) => `
 *{box-sizing:border-box}
 html,body,#root{height:100%}
 body{margin:0;display:block;min-height:100vh;background:var(--bg);color:var(--fg);font-family:'Noto Sans JP',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
-.page{min-height:100vh;background:radial-gradient(circle at top,var(--accent-soft),rgba(15,23,42,0.05));position:relative;overflow:hidden}
-.page::before{content:'';position:fixed;inset:0;background:url(${bgAurora}) center/cover no-repeat;opacity:0.24;pointer-events:none;z-index:0}
+  .page{min-height:100vh;background:radial-gradient(circle at top,var(--accent-soft),rgba(15,23,42,0.05));position:relative;overflow:hidden}
+  .page::before{content:'';position:fixed;inset:0;background:url(${bgAurora}) center/cover no-repeat;opacity:0.6;pointer-events:none;z-index:0}
 .page > *{position:relative;z-index:1}
 .topbar{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:14px 22px;background:rgba(255,255,255,0.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(0,0,0,0.06)}
 .topbar__brand{display:flex;align-items:center;gap:12px;font-weight:700;font-size:20px;letter-spacing:0.06em;color:var(--accent)}
