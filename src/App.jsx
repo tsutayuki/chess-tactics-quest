@@ -253,8 +253,8 @@ export default function App() {
   const character = CHARACTER_MAP[currentPuzzle.characterId] || FALLBACK_CHARACTER;
   const [initialTurn, setInitialTurn] = useState("w");
 
-  const files = orientation === "white" ? FILES_WHITE : FILES_BLACK;
-  const ranks = orientation === "white" ? RANKS_WHITE : RANKS_BLACK;
+  const files = orientation === "white" ? FILES_BLACK : FILES_WHITE;
+  const ranks = orientation === "white" ? RANKS_BLACK : RANKS_WHITE;
 
   const listSquares = useCallback(() => {
     const squareList = [];
